@@ -106,9 +106,13 @@ def read_magma(magma_prefix, use_magma_covariates, use_magma_error_cov):
         sigmas, gene_metadata = munge_magma_covariance_metadata(magma_prefix + ".genes.raw")
         cov_df = build_control_covariates(gene_metadata)
         ### Process
-        assert (cov_df.index.values == Y_ids).all(), "Covariate ids and Y ids don't match."
         covariates = cov_df.values
         error_cov = scipy.linalg.block_diag(*sigmas)
+        if not np.all(cov_df.index.values == Y_ids):
+            logging.warning("Covariate ids and Y ids don't match.")
+            idx = np.where(np.isin(cov_df.index.values, Y_ids))[0]
+            covariates = covariates[idx, :]
+            error_cov = error_cov[idx, idx]
     if use_magma_covariates == False:
         covariates = None
     if use_magma_error_cov == False:
