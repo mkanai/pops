@@ -108,11 +108,11 @@ def read_magma(magma_prefix, use_magma_covariates, use_magma_error_cov):
         ### Process
         covariates = cov_df.values
         error_cov = scipy.linalg.block_diag(*sigmas)
-        if not np.all(cov_df.index.values == Y_ids):
+        if not np.array_equal(cov_df.index.values, Y_ids):
             logging.warning("Covariate ids and Y ids don't match.")
             idx = np.where(np.isin(cov_df.index.values, Y_ids))[0]
             covariates = covariates[idx, :]
-            error_cov = error_cov[idx, idx]
+            error_cov = error_cov[np.ix_(idx, idx)]
     if use_magma_covariates == False:
         covariates = None
     if use_magma_error_cov == False:
